@@ -4,6 +4,11 @@ Version Changes for Hypermail
 ============================
 HYPERMAIL VERSION 3.0.0
 ============================
+2024-11-06 Jose Kahan
+	* src/hypermail.c
+	If hypermail was called with its default configuration values,
+	set_labels was given a static value, which resulted in a sigsev
+	when hypermail tried to do clean-up when ending its run.
 
 2023-00-00 Jose Kahan
 	* src/parse.c

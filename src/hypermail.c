@@ -458,7 +458,7 @@ int main(int argc, char **argv)
     }
 
     if (!set_label || !strcasecmp(set_label, "NONE")) {
-	set_label = set_mbox ? (strreplace(set_label, (strrchr(set_mbox, '/')) ? strrchr(set_mbox, '/') + 1 : set_mbox)) : "stdin";
+	set_label = set_mbox ? (strreplace(set_label, (strrchr(set_mbox, '/')) ? strrchr(set_mbox, '/') + 1 : set_mbox)) : strsav("stdin");
     }
     
     /*
