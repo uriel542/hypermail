@@ -296,6 +296,15 @@ ifelse($3,,[
 ])
 
 dnl
+dnl check for pkg-config
+dnl
+
+AC_MSG_NOTICE(checking for pkg-config)
+if test x"$PKG_CONFIG" == x ; then
+   AC_MSG_ERROR('pkg-config' is missing; please install it.)
+fi
+
+dnl
 dnl gdbm check
 dnl
 
@@ -512,31 +521,67 @@ dnl
 dnl check for libchardet
 dnl
 
-AC_MSG_NOTICE(checking for a system libchardet)
-found_chardet=""
-if test x"$PKG_CONFIG" != x ; then 
-   cflags=`$PKG_CONFIG chardet --cflags-only-I 2>/dev/null`
-   if test $? -eq 0; then
-      APR_ADDTO(INCLUDES, [$cflags])
-      ldflags=`$PKG_CONFIG chardet --libs-only-l 2>/dev/null`
-      APR_ADDTO(EXTRA_LIBS, [$ldflags])
-      unset cflags
-      unset ldflags
-      found_chardet=yes
-      AC_DEFINE_UNQUOTED(HAVE_CHARDET,[1],[Have libchardet support])
-   fi
-fi
+AC_ARG_WITH(libchardet,
+	    AS_HELP_STRING([--with-libchardet=[DIR]],
+			   [Use libchardet for character set detection, optional DIR points to path to local installed libchardet; leave empty for using system libchardet]),
+	    [ given_libchardet=$withval ],
+	    [ given_libchardet='yes' ])
 
-if test "${found_chardet}" = "yes"; then
-      AC_MSG_RESULT(yes)
+found_libchardet=""
+
+AC_MSG_CHECKING(whether to use libchardet for automatic character set detection)
+if test -n "${given_libchardet}" -a "${given_libchardet}" != "no"; then
+    AC_MSG_RESULT(yes)
+
+    pkg_config_path=""
+    pkg_config_print_libs=""
+
+    dnl check for libchardet in user-defined dir or system one (default)
+    if test "${given_libchardet}" != "yes" -a "${given_libchardet}" != "/usr"; then
+	AC_MSG_CHECKING(for libchardet in "${given_libchardet}")	
+        if test -d "${given_libchardet}/lib/pkgconfig"; then
+            pkg_config_path="${given_libchardet}/lib/pkgconfig"
+	    pkg_config_print_libs="--libs"
+	else
+	    AC_MSG_RESULT(no)	
+	    AC_MSG_NOTICE("${given_libchardet}"/lib/pkgconfig doesn't exist)
+        fi
+    fi
+
+    if test -z "${pkg_config_path}"; then
+	AC_MSG_CHECKING(for system libchardet)
+	pkg_config_print_libs="--libs-only-l"
+    fi 
+
+    cflags=`PKG_CONFIG_PATH="${pkg_config_path}:${PKG_CONFIG_PATH}" $PKG_CONFIG chardet --cflags-only-I 2>/dev/null`
+
+    if test $? -eq 0; then
+	AC_MSG_RESULT(yes)
+	APR_ADDTO(INCLUDES, [$cflags])
+	ldflags=`PKG_CONFIG_PATH="${pkg_config_path}:${PKG_CONFIG_PATH}" $PKG_CONFIG --with-path="${pkg_config_path}" chardet ${pkg_config_print_libs} 2>/dev/null`
+	APR_ADDTO(EXTRA_LIBS, [$ldflags])
+	unset ldflags
+	found_libchardet=yes
+	AC_DEFINE_UNQUOTED(HAVE_CHARDET,[1],[Use libchardet for character set detection])
+    else
+	AC_MSG_RESULT(no)
+    fi
+
+    unset cflags
+    unset pkg_config_path
+    unset pkg_config_print_libs
 else
-      AC_MSG_RESULT(no)
-      AC_MSG_WARN(hypermail's automatic charset detection won't be available unless you install libchardet)
-      AC_MSG_WARN(See hypermail's release notes)
-      AC_MSG_WARN(https://github.com/Joungkyun/libchardet)
+    AC_MSG_RESULT(no)
+fi
+			  
+if test "${found_libchardet}" != "yes"; then
+    AC_MSG_WARN(hypermail's automatic charset detection won't)
+    AC_MSG_WARN(be available unless you install libchardet.)
+    AC_MSG_WARN(See hypermail's release notes)
+    dnl AC_MSG_WARN(https://github.com/Joungkyun/libchardet)
 fi
 
-unset found_chardet
+unset found_libchardet
 
 dnl
 dnl The FNV hash library used for the nonsequential filenames

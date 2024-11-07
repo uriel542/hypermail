@@ -4,6 +4,12 @@ Version Changes for Hypermail
 ============================
 HYPERMAIL VERSION 3.0.0
 ============================
+
+2024-11-07 Jose Kahan
+	* configure.ac, configure
+	Improve detection of libchardet (system, local dir) and enable
+	it by default
+
 2024-11-06 Jose Kahan
 	* src/hypermail.c
 	If hypermail was called with its default configuration values,

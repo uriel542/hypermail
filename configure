@@ -813,6 +813,7 @@ enable_i18n
 enable_system_libtrio
 enable_bundled_pcre
 with_external_pcre2
+with_libchardet
 enable_libfnv
 '
       ac_precious_vars='build_alias
@@ -1470,6 +1471,9 @@ Optional Packages:
   --with-external-pcre2=PATH_TO_PCRE2_DIR|PATH_TO_PCRE2_CONFIG_SCRIPT
                           Use an external PCRE2 library instead of the system
                           or the bundled one
+  --with-libchardet=DIR   Use libchardet for character set detection, optional
+                          DIR points to path to local installed libchardet;
+                          leave empty for using system libchardet
 
 Some influential environment variables:
   CC          C compiler command
@@ -5545,6 +5549,13 @@ fi
 
 
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pkg-config" >&5
+printf "%s\n" "$as_me: checking for pkg-config" >&6;}
+if test x"$PKG_CONFIG" == x ; then
+   as_fn_error $? "'pkg-config' is missing; please install it." "$LINENO" 5
+fi
+
+
 
 # Check whether --with-gdbm was given.
 if test ${with_gdbm+y}
@@ -6537,12 +6548,52 @@ fi
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for a system libchardet" >&5
-printf "%s\n" "$as_me: checking for a system libchardet" >&6;}
-found_chardet=""
-if test x"$PKG_CONFIG" != x ; then
-   cflags=`$PKG_CONFIG chardet --cflags-only-I 2>/dev/null`
-   if test $? -eq 0; then
+
+# Check whether --with-libchardet was given.
+if test ${with_libchardet+y}
+then :
+  withval=$with_libchardet;  given_libchardet=$withval
+else $as_nop
+   given_libchardet='yes'
+fi
+
+
+found_libchardet=""
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use libchardet for automatic character set detection" >&5
+printf %s "checking whether to use libchardet for automatic character set detection... " >&6; }
+if test -n "${given_libchardet}" -a "${given_libchardet}" != "no"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+
+    pkg_config_path=""
+    pkg_config_print_libs=""
+
+        if test "${given_libchardet}" != "yes" -a "${given_libchardet}" != "/usr"; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libchardet in \"${given_libchardet}\"" >&5
+printf %s "checking for libchardet in \"${given_libchardet}\"... " >&6; }
+        if test -d "${given_libchardet}/lib/pkgconfig"; then
+            pkg_config_path="${given_libchardet}/lib/pkgconfig"
+	    pkg_config_print_libs="--libs"
+	else
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \"${given_libchardet}\"/lib/pkgconfig doesn't exist" >&5
+printf "%s\n" "$as_me: \"${given_libchardet}\"/lib/pkgconfig doesn't exist" >&6;}
+        fi
+    fi
+
+    if test -z "${pkg_config_path}"; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for system libchardet" >&5
+printf %s "checking for system libchardet... " >&6; }
+	pkg_config_print_libs="--libs-only-l"
+    fi
+
+    cflags=`PKG_CONFIG_PATH="${pkg_config_path}:${PKG_CONFIG_PATH}" $PKG_CONFIG chardet --cflags-only-I 2>/dev/null`
+
+    if test $? -eq 0; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
 
   if test "x$INCLUDES" = "x"; then
     test "x$silent" != "xyes" && echo "  setting INCLUDES to \"$cflags\""
@@ -6564,7 +6615,7 @@ if test x"$PKG_CONFIG" != x ; then
     done
   fi
 
-      ldflags=`$PKG_CONFIG chardet --libs-only-l 2>/dev/null`
+	ldflags=`PKG_CONFIG_PATH="${pkg_config_path}:${PKG_CONFIG_PATH}" $PKG_CONFIG --with-path="${pkg_config_path}" chardet ${pkg_config_print_libs} 2>/dev/null`
 
   if test "x$EXTRA_LIBS" = "x"; then
     test "x$silent" != "xyes" && echo "  setting EXTRA_LIBS to \"$ldflags\""
@@ -6586,30 +6637,34 @@ if test x"$PKG_CONFIG" != x ; then
     done
   fi
 
-      unset cflags
-      unset ldflags
-      found_chardet=yes
+	unset ldflags
+	found_libchardet=yes
 
 printf "%s\n" "#define HAVE_CHARDET 1" >>confdefs.h
 
-   fi
-fi
-
-if test "${found_chardet}" = "yes"; then
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-else
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+    else
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: hypermail's automatic charset detection won't be available unless you install libchardet" >&5
-printf "%s\n" "$as_me: WARNING: hypermail's automatic charset detection won't be available unless you install libchardet" >&2;}
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: See hypermail's release notes" >&5
-printf "%s\n" "$as_me: WARNING: See hypermail's release notes" >&2;}
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: https://github.com/Joungkyun/libchardet" >&5
-printf "%s\n" "$as_me: WARNING: https://github.com/Joungkyun/libchardet" >&2;}
+    fi
+
+    unset cflags
+    unset pkg_config_path
+    unset pkg_config_print_libs
+else
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
 fi
 
-unset found_chardet
+if test "${found_libchardet}" != "yes"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: hypermail's automatic charset detection won't" >&5
+printf "%s\n" "$as_me: WARNING: hypermail's automatic charset detection won't" >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: be available unless you install libchardet." >&5
+printf "%s\n" "$as_me: WARNING: be available unless you install libchardet." >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: See hypermail's release notes" >&5
+printf "%s\n" "$as_me: WARNING: See hypermail's release notes" >&2;}
+    fi
+
+unset found_libchardet
 
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to use fnv hash library for non-sequential filenames" >&5
