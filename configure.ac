@@ -58,7 +58,7 @@ if test -z "$no_ranlib"; then
 else
   RANLIB=":"
 fi
-AC_CHECK_TOOL([PKG_CONFIG], [pkg-config])
+AC_CHECK_TOOL([PKGCONF], [pkgconf])
 
 dnl ===========================================================================
 dnl Determine the host type and set compliation flags as needed
@@ -300,8 +300,8 @@ dnl check for pkg-config
 dnl
 
 AC_MSG_NOTICE(checking for pkg-config)
-if test x"$PKG_CONFIG" == x ; then
-   AC_MSG_ERROR('pkg-config' is missing; please install it.)
+if test x"$PKGCONF" == x ; then
+   AC_MSG_ERROR('pkgconf' is missing; please install it.)
 fi
 
 dnl
@@ -533,14 +533,14 @@ AC_MSG_CHECKING(whether to use libchardet for automatic character set detection)
 if test -n "${given_libchardet}" -a "${given_libchardet}" != "no"; then
     AC_MSG_RESULT(yes)
 
-    pkg_config_path=""
+    user_pkg_config_path=""
     pkg_config_print_libs=""
 
     dnl check for libchardet in user-defined dir or system one (default)
     if test "${given_libchardet}" != "yes" -a "${given_libchardet}" != "/usr"; then
 	AC_MSG_CHECKING(for libchardet in "${given_libchardet}")	
         if test -d "${given_libchardet}/lib/pkgconfig"; then
-            pkg_config_path="${given_libchardet}/lib/pkgconfig"
+            user_pkg_config_path="${given_libchardet}/lib/pkgconfig"
 	    pkg_config_print_libs="--libs"
 	else
 	    AC_MSG_RESULT(no)	
@@ -548,17 +548,17 @@ if test -n "${given_libchardet}" -a "${given_libchardet}" != "no"; then
         fi
     fi
 
-    if test -z "${pkg_config_path}"; then
+    if test -z "${user_pkg_config_path}"; then
 	AC_MSG_CHECKING(for system libchardet)
 	pkg_config_print_libs="--libs-only-l"
     fi 
 
-    cflags=`PKG_CONFIG_PATH="${pkg_config_path}:${PKG_CONFIG_PATH}" $PKG_CONFIG chardet --cflags-only-I 2>/dev/null`
+    cflags=`PKGCONFIG_PATH="${user_pkg_config_path}:${PKG_CONFIG_PATH}" $PKGCONF chardet --cflags-only-I 2>/dev/null`
 
     if test $? -eq 0; then
 	AC_MSG_RESULT(yes)
 	APR_ADDTO(INCLUDES, [$cflags])
-	ldflags=`PKG_CONFIG_PATH="${pkg_config_path}:${PKG_CONFIG_PATH}" $PKG_CONFIG --with-path="${pkg_config_path}" chardet ${pkg_config_print_libs} 2>/dev/null`
+	ldflags=`PKG_CONFIG_PATH="${user_pkg_config_path}:${PKG_CONFIG_PATH}" $PKGCONF chardet ${pkg_config_print_libs} 2>/dev/null`
 	APR_ADDTO(EXTRA_LIBS, [$ldflags])
 	unset ldflags
 	found_libchardet=yes
@@ -568,7 +568,7 @@ if test -n "${given_libchardet}" -a "${given_libchardet}" != "no"; then
     fi
 
     unset cflags
-    unset pkg_config_path
+    unset user_pkg_config_path
     unset pkg_config_print_libs
 else
     AC_MSG_RESULT(no)
@@ -590,7 +590,7 @@ dnl
 AC_MSG_CHECKING([whether to use fnv hash library for non-sequential filenames])
 AC_ARG_ENABLE(libfnv, 
      [	    AS_HELP_STRING([--enable-libfnv],
-                           [use the fnv hash library for generating non-sequential filenames [no]])
+                           [EXPERIMENTAL, UNMAINTAINED: use the fnv hash library for generating non-sequential filenames [no]])
      ],
      [ given_libfnv=$enableval ])
      
