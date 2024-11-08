@@ -2,9 +2,12 @@
 ||BUILDING AND INSTALLING HYPERMAIL  ||
 =======================================
 
+PLEASE READ THE RELEASE NOTES FIRST.
+
 Quick summary:
 =============
 cd hypermail_checkout_directory
+./autogen.sh
 ./configure
 make
 make install
@@ -23,23 +26,59 @@ For compiling hypermail:
 * bison >=3.7 or yacc (mandatory)
   bison is prefered as it's what we use in our dev. environment.
 
-* libpcre2-dev >= 10.36 (optional)
+* libiconv (mandatory)
+  libiconv is included in the libc6 package as a GNU standard C
+  library. In order to compile hypermail, you'll need to install its
+  headers
+
+  On Debian:
+
+     apt-get install libc6-dev
+
+* pkgconf (mandatory)
+  pkgconf is a system for configuring build dependency information
+  and is used for compiling against some of the libraries hypermail uses.
+
+  On Debian:
+
+     apt-get install pkgconf
+     
+* libpcre2-dev >= 10.32 (optional)
   if you don't have it, hypermail will compile and link with
   it's own shipped-in version (src/pcre2)
 
 * libgdbm-dev (optional)
   only needed if you plan to use the usegdbm hypermail configuration
-  option (see docs/hmrc.html)
+  option (unmaintained, see docs/hmrc.html)
 
+* libchardet-dev (optional)
+  only needed if you want to benefit from automatic character set
+  detection in messages that don't provide any charset information.
+  Mostly useful when you're dealing with archives having messages
+  dating from 1990-2002, when many mail clients were a bit broken.
+
+  On Debian:
+  
+     apt-get install libchardet-dev libchardet
+
+  If not available in your system, you can download the source code,
+  compile and install it:
+  
+     https://github.com/Joungkyun/libchardet
+  
 For running hypermail:
 
-* libpcre2 >= 10.36
+* libpcre2 >= 10.42
   only needed if you linked hypermail against the system libpcre
   library
 
+* libchardet (optional)
+  only needed if you linked hypermail against the system libchardet
+  library
+  
 * libgdm (optional)
   only needed if you plan to use the usegdbm hypermail configuration option
-  (see docs/hmrc.html)
+  (unmaintained, see docs/hmrc.html)
 
 SECURITY WARNING:
 ================
@@ -76,7 +115,7 @@ Building Hypermail:
    in the past. It compiles with both gcc and clang in the following
    platforms:
 
-     Debian 11, Ubuntu 22.04.2 LTS
+     Debian 12, Ubuntu 22.04.2 LTS
 
    Previously, it used to compile against a wide variety of Unix
    platforms, MacOS, and Cygwin but we've not done it recently
@@ -88,12 +127,29 @@ Building Hypermail:
 
    Generic Build:
 
+   0) If you're checking out and building hypermail for the first time,
+      type "./autogen" to update the configure files to your
+      local system setup.
+
+      You only need to do this once, when you do the clone of the
+      repository.
+       
     1) Type "./configure". This creates the makefiles and the
            config.h file needed to build the software.
 	   
        If you want to install Hypermail somewhere other than in
        /usr/local, run something like this instead:
        ./configure --prefix=$HOME
+
+       There are some options you can enable or disable but all the
+       useful ones are enabled by default. You can also use the
+       options to give paths to local checkout of the dependent libraries
+       if you didn't install them on your system.
+       ./configure --help
+	  
+       Check out the configure output to see if you're missing system
+       libraries. If yes, install them and launch ./configure again.
+
 
     2) Type "make". This will build the software.
     
