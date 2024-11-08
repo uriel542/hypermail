@@ -5,6 +5,11 @@ Version Changes for Hypermail
 HYPERMAIL VERSION 3.0.0
 ============================
 
+2024-11-08 Jose Kahan
+	* src/string.c
+	truncate Content-Type and charset field values at first illegal
+	character
+
 2024-11-07 Jose Kahan
 	* configure.ac, configure
 	Improve detection of libchardet (system, local dir) and enable
