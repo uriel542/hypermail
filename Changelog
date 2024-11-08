@@ -10,6 +10,21 @@ HYPERMAIL VERSION 3.0.0
 	truncate Content-Type and charset field values at first illegal
 	character
 
+	* src/parse.c
+	Improve integration of libchardet for converting mail header values to
+	utf-8 / remove compiler warnings
+
+	New function header_detect_charset_and_convert_to_utf8() that converts
+	selected mail headers (Subject:, To:, From:) to UTF-8 using the charset
+	field from the message's Content-Type header.  If no charset field
+	exists and the header's value is neither valid ASCII or UTF-8, the
+	function will use libchardet to try to detect its charset and convert
+	it to UTF-8. If all fails, the header value will be replaced with
+	"(invalid string)".
+
+	Fixed compiler warnings as reported by pedantic, unused variables
+	flags.  src/parse.c
+
 2024-11-07 Jose Kahan
 	* configure.ac, configure
 	Improve detection of libchardet (system, local dir) and enable
@@ -17,7 +32,7 @@ HYPERMAIL VERSION 3.0.0
 
 	* pkgconf, libiconv
 	Make pkgconf and libiconv mandatory for compiling hypermail
-	
+
 2024-11-06 Jose Kahan
 	* src/hypermail.c
 	If hypermail was called with its default configuration values,
