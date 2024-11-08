@@ -310,7 +310,7 @@ dnl
 
 AC_ARG_WITH(gdbm,
    AS_HELP_STRING([--with-gdbm=[DIR]],
-                  [Include GDBM support]),
+                  [(UNMAINTAINED) Include GDBM support]),
    [ given_gdbm=$withval])
 
 if test "${given_gdbm}" = "no"; then
@@ -382,13 +382,13 @@ dnl
 dnl iconv check
 dnl
 
-AC_ARG_ENABLE(i18n, [  --disable-i18n           Disable I18N support], [given_iconv=$enableval])
-if test "$given_iconv" = "no"; then
-  echo "disabled I18N support."
-else
-  AC_CHECK_FUNCS(iconv)
-  AC_CHECK_HEADERS(iconv.h)
-fi
+dnl iconv is part of libc6
+AC_CHECK_HEADERS(iconv.h,
+		 [],
+		 [AC_MSG_ERROR([unable to find iconv.h headers (libc6-dev may be missing)])])
+AC_CHECK_FUNCS(iconv,
+	       [],
+	       [AC_MSG_ERROR([unable to find iconv() function])])
 
 dnl
 dnl libtrio: select whether to use the system or the bundled libtrio
@@ -589,10 +589,10 @@ dnl
 
 AC_MSG_CHECKING([whether to use fnv hash library for non-sequential filenames])
 AC_ARG_ENABLE(libfnv, 
-     [	    AS_HELP_STRING([--enable-libfnv],
-                           [EXPERIMENTAL, UNMAINTAINED: use the fnv hash library for generating non-sequential filenames [no]])
+     [AS_HELP_STRING([--enable-libfnv],
+                           [(EXPERIMENTAL, UNMAINTAINED) use the fnv hash library for generating non-sequential filenames [no]])
      ],
-     [ given_libfnv=$enableval ])
+     [given_libfnv=$enableval])
      
 if test "$given_libfnv" != "yes"; then
   AC_MSG_RESULT([no])

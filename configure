@@ -809,7 +809,6 @@ with_htmlsuffix
 enable_defaultindex
 with_domainaddr
 with_gdbm
-enable_i18n
 enable_system_libtrio
 enable_bundled_pcre
 with_external_pcre2
@@ -1450,13 +1449,12 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-warnings       Enable -Wall if using gcc.
   --enable-defaultindex=type	Default index page type thread
-  --disable-i18n           Disable I18N support
   --enable-system-libtrio Use the system libtrio instead of compiling the
                           bundled one
   --enable-bundled-pcre2  Force the use of the bundled PCRE2 library instead
                           of the system one
-	      --enable-libfnv         EXPERIMENTAL, UNMAINTAINED: use the fnv hash library
-                          for generating non-sequential filenames [no]
+  --enable-libfnv         (EXPERIMENTAL, UNMAINTAINED) use the fnv hash
+                          library for generating non-sequential filenames [no]
 
 
 Optional Packages:
@@ -1467,7 +1465,7 @@ Optional Packages:
   --with-language=xx	  two character language indicator en
   --with-htmlsuffix=xx	  two character language indicator html
   --with-domainaddr=YOURDOMAIN	  domain address of local domain
-  --with-gdbm=DIR         Include GDBM support
+  --with-gdbm=DIR         (UNMAINTAINED) Include GDBM support
   --with-external-pcre2=PATH_TO_PCRE2_DIR|PATH_TO_PCRE2_CONFIG_SCRIPT
                           Use an external PCRE2 library instead of the system
                           or the bundled one
@@ -5799,30 +5797,31 @@ printf "%s\n" "$as_me: WARNING: hypermail's usegdbm config option won't be avail
 fi
 
 
-# Check whether --enable-i18n was given.
-if test ${enable_i18n+y}
-then :
-  enableval=$enable_i18n; given_iconv=$enableval
-fi
-
-if test "$given_iconv" = "no"; then
-  echo "disabled I18N support."
-else
-  ac_fn_c_check_func "$LINENO" "iconv" "ac_cv_func_iconv"
-if test "x$ac_cv_func_iconv" = xyes
-then :
-  printf "%s\n" "#define HAVE_ICONV 1" >>confdefs.h
-
-fi
-
+       for ac_header in iconv.h
+do :
   ac_fn_c_check_header_compile "$LINENO" "iconv.h" "ac_cv_header_iconv_h" "$ac_includes_default"
 if test "x$ac_cv_header_iconv_h" = xyes
 then :
   printf "%s\n" "#define HAVE_ICONV_H 1" >>confdefs.h
 
+else $as_nop
+  as_fn_error $? "unable to find iconv.h headers (libc6-dev may be missing)" "$LINENO" 5
 fi
 
+done
+
+  for ac_func in iconv
+do :
+  ac_fn_c_check_func "$LINENO" "iconv" "ac_cv_func_iconv"
+if test "x$ac_cv_func_iconv" = xyes
+then :
+  printf "%s\n" "#define HAVE_ICONV 1" >>confdefs.h
+
+else $as_nop
+  as_fn_error $? "unable to find iconv() function" "$LINENO" 5
 fi
+
+done
 
 
 # Check whether --enable-system_libtrio was given.
@@ -6672,7 +6671,7 @@ printf %s "checking whether to use fnv hash library for non-sequential filenames
 # Check whether --enable-libfnv was given.
 if test ${enable_libfnv+y}
 then :
-  enableval=$enable_libfnv;  given_libfnv=$enableval
+  enableval=$enable_libfnv; given_libfnv=$enableval
 fi
 
 

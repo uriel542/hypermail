@@ -10,6 +10,9 @@ HYPERMAIL VERSION 3.0.0
 	Improve detection of libchardet (system, local dir) and enable
 	it by default
 
+	* pkgconf, libiconv
+	Make pkgconf and libiconv mandatory for compiling hypermail
+	
 2024-11-06 Jose Kahan
 	* src/hypermail.c
 	If hypermail was called with its default configuration values,
