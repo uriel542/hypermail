@@ -14,13 +14,15 @@ HYPERMAIL VERSION 3.0.0
 	Improve integration of libchardet for converting mail header values to
 	utf-8 / remove compiler warnings
 
-	New function header_detect_charset_and_convert_to_utf8() that converts
-	selected mail headers (Subject:, To:, From:) to UTF-8 using the charset
-	field from the message's Content-Type header.  If no charset field
-	exists and the header's value is neither valid ASCII or UTF-8, the
-	function will use libchardet to try to detect its charset and convert
-	it to UTF-8. If all fails, the header value will be replaced with
-	"(invalid string)".
+	This change let's the parset detect the charset of a message when the
+	Content-Type: header is missing the charset field or if a header value
+	is in another charset and it's not encoded using RFC2047.  To do so,
+	the parser calls a function that examines the To:, From: and Subject:
+	header values and, when they don't have valid ASCII or UTF-8 strings,
+	if it detects the charset, it will convert the header value to UTF-8
+	and use that charset for the rest of the message. If it fails to detect
+	it, it will replace the whole header value with a "(invalid string)"
+	string.
 
 	Fixed compiler warnings as reported by pedantic, unused variables
 	flags.  src/parse.c
